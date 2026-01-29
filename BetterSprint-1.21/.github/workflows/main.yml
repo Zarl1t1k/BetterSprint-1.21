@@ -4,6 +4,9 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BetterSprint-1.21  # Это скажет GitHub зайти в нужную папку
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -24,4 +27,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BetterSprint-Jar
-          path: build/libs/*.jar
+          path: BetterSprint-1.21/build/libs/*.jar
