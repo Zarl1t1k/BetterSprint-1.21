@@ -6,7 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: BetterSprint-1.21
+        # Указываем путь, где реально лежат файлы gradlew и build.gradle
+        working-directory: BetterSprint-1.21/BetterSprint-1.21
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -27,4 +28,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BetterSprint-Jar
-          path: BetterSprint-1.21/build/libs/*.jar
+          path: BetterSprint-1.21/BetterSprint-1.21/build/libs/*.jar
