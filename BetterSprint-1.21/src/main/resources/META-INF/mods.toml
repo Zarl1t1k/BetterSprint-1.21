@@ -1,0 +1,7 @@
+modLoader="javafml"
+loaderVersion="[51,)"
+license="MIT"
+[[mods]]
+modId="bettersprint"
+version="1.0"
+displayName="Better Sprint"
