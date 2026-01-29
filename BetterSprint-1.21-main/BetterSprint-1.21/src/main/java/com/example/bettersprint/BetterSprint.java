@@ -17,61 +17,50 @@ import org.lwjgl.glfw.GLFW;
 public class BetterSprint {
     public static final String MODID = "bettersprint";
 
-    // 1. Создаем саму кнопку. 
-    // "key.bettersprint.toggle" — это её внутреннее имя.
-    // GLFW_KEY_B — это та самая английская "B".
-    public static final KeyMapping MY_KEY = new KeyMapping(
-            "Вкл/Выкл Автоспринт", 
+    // Создаем кнопку B
+    public static final KeyMapping TOGGLE_KEY = new KeyMapping(
+            "Включить Автоспринт", 
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_B, 
-            "Better Sprint Мод"
+            "Better Sprint"
     );
 
-    // 2. Это «флажок». Если true — мод работает, если false — отдыхает.
-    private boolean isEnabled = true;
+    // Флажок: включен мод или нет
+    private boolean enabled = true;
 
     public BetterSprint() {
-        // Говорим игре: "Слушай этот класс, тут будут события!"
+        // Регистрация событий тика (каждый кадр игры)
         MinecraftForge.EVENT_BUS.register(this);
-        
-        // Говорим игре: "У нас есть новая кнопка, зарегистрируй её!"
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRegisterKeys);
+        // Регистрация кнопки в меню настроек
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKey);
     }
 
-    // Этот метод просто добавляет кнопку в настройки игры
-    public void onRegisterKeys(RegisterKeyMappingsEvent event) {
-        event.register(MY_KEY);
+    public void registerKey(RegisterKeyMappingsEvent event) {
+        event.register(TOGGLE_KEY);
     }
 
-    // Это сердце мода. Этот метод вызывается 20 раз в секунду (каждый тик игры).
     @SubscribeEvent
-    public void onGameTick(TickEvent.ClientTickEvent event) {
-        // Нам нужно проверять нажатие кнопки только в конце игрового тика
+    public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return; // Если мы еще не в мире, ничего не делаем
+        if (mc.player == null) return;
 
-        // 3. Проверяем: нажал ли игрок кнопку B?
-        while (MY_KEY.consumeClick()) {
-            isEnabled = !isEnabled; // Меняем состояние (с вкл на выкл и наоборот)
-            
-            // Пишем игроку в чат, что произошло
-            String message = isEnabled ? "Автоспринт ВКЛ" : "Автоспринт ВЫКЛ";
-            mc.player.displayClientMessage(Component.literal(message), true);
+        // Если нажали B — меняем состояние
+        while (TOGGLE_KEY.consumeClick()) {
+            enabled = !enabled;
+            String text = enabled ? "§aВКЛ" : "§cВЫКЛ";
+            mc.player.displayClientMessage(Component.literal("Автоспринт: " + text), true);
         }
 
-        // 4. Магия бега
-        if (isEnabled) {
+        // Если включено — заставляем бежать
+        if (enabled) {
             LocalPlayer player = mc.player;
-            
-            // Если игрок жмет кнопку "вперед" (W)
-            if (player.input.hasForwardImpulse()) {
-                // Если он при этом не крадется и не ест яблоко/пьет зелье
-                if (!player.isShiftKeyDown() && !player.isUsingItem()) {
-                    // ВКЛЮЧАЕМ БЕГ!
+            if (player.input.hasForwardImpulse() && !player.isShiftKeyDown() && !player.isUsingItem()) {
+                if (!player.isSprinting() && player.getFoodData().getFoodLevel() > 6) {
                     player.setSprinting(true);
                 }
             }
         }
     }
+}
